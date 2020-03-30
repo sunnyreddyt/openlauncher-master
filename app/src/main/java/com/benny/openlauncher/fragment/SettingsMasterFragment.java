@@ -100,7 +100,7 @@ public class SettingsMasterFragment extends SettingsBaseFragment {
                         if (userModelArrayList != null) {
                             boolean userExists = false;
                             for (int p = 0; p < userModelArrayList.size(); p++) {
-                                if (userModelArrayList.get(p).getUsername().equalsIgnoreCase(username)) {
+                                if (userModelArrayList.get(p).getUsername().equalsIgnoreCase(username)&&userModelArrayList.get(p).getPassword().equals(password)) {
                                     userExists = true;
                                 }
                             }
