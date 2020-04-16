@@ -87,20 +87,30 @@ public class SettingsMasterFragment extends SettingsBaseFragment {
         EditText usernameEditText = loginDialog.findViewById(R.id.usernameEditText);
         EditText passwordEditText = loginDialog.findViewById(R.id.passwordEditText);
         TextView saveTextView = loginDialog.findViewById(R.id.saveTextView);
+        TextView forgotPasswordTextView = loginDialog.findViewById(R.id.forgotPasswordTextView);
         headingTextView.setText("User Login");
+
+        forgotPasswordTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loginDialog.dismiss();
+                forgotPasswordFragment();
+            }
+        });
+
         saveTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String username = usernameEditText.getText().toString();
                 String password = passwordEditText.getText().toString();
-                if (username != null && password != null & username.length() > 0 && password.length() > 0) {
+                if (username != null && password != null && isValidEmail(username) && isValidPassword(password)) {
                     UserListModel userListModel = AppSettings.get().getUserListModel();
                     if (userListModel != null) {
                         ArrayList<UserModel> userModelArrayList = userListModel.getUserModelArrayList();
                         if (userModelArrayList != null) {
                             boolean userExists = false;
                             for (int p = 0; p < userModelArrayList.size(); p++) {
-                                if (userModelArrayList.get(p).getUsername().equalsIgnoreCase(username)&&userModelArrayList.get(p).getPassword().equals(password)) {
+                                if (userModelArrayList.get(p).getUsername().equalsIgnoreCase(username) && userModelArrayList.get(p).getPassword().equals(password)) {
                                     userExists = true;
                                 }
                             }
@@ -111,16 +121,16 @@ public class SettingsMasterFragment extends SettingsBaseFragment {
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                                 startActivity(intent);
                             } else {
-                                Toast.makeText(getActivity(), "Invalid details", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getActivity(), "User not exists", Toast.LENGTH_SHORT).show();
                             }
                         } else {
-                            Toast.makeText(getActivity(), "Invalid details", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "User not exists", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        Toast.makeText(getActivity(), "Invalid details", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), "User not exists", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(getActivity(), "Please fill all details", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Email or Password is not valid", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -138,6 +148,95 @@ public class SettingsMasterFragment extends SettingsBaseFragment {
     }
 
 
+    public void forgotPasswordFragment() {
+        final Dialog forgotPasswordDialog = new Dialog(getActivity());
+        forgotPasswordDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        forgotPasswordDialog.setContentView(R.layout.login_dialog);
+        forgotPasswordDialog.setCanceledOnTouchOutside(false);
+        forgotPasswordDialog.setCancelable(true);
+
+        TextView headingTextView = forgotPasswordDialog.findViewById(R.id.headingTextView);
+        TextView registerTextView = forgotPasswordDialog.findViewById(R.id.registerTextView);
+        EditText usernameEditText = forgotPasswordDialog.findViewById(R.id.usernameEditText);
+        EditText passwordEditText = forgotPasswordDialog.findViewById(R.id.passwordEditText);
+        TextView saveTextView = forgotPasswordDialog.findViewById(R.id.saveTextView);
+        TextView forgotPasswordTextView = forgotPasswordDialog.findViewById(R.id.forgotPasswordTextView);
+        forgotPasswordTextView.setVisibility(View.GONE);
+        registerTextView.setVisibility(View.GONE);
+        passwordEditText.setVisibility(View.GONE);
+        saveTextView.setText("SUBMIT");
+        headingTextView.setText("Forgot Password");
+
+        saveTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String username = usernameEditText.getText().toString();
+                UserModel userModel = new UserModel();
+                userModel.setUsername(username);
+
+                if (saveTextView.getText().equals("SUBMIT")) {
+                    if (username != null && isValidEmail(username)) {
+                        UserListModel userListModel = AppSettings.get().getUserListModel();
+                        if (userListModel != null) {
+                            ArrayList<UserModel> userModelArrayList = userListModel.getUserModelArrayList();
+                            if (userModelArrayList != null) {
+                                boolean userExists = false;
+                                for (int p = 0; p < userModelArrayList.size(); p++) {
+                                    if (userModelArrayList.get(p).getUsername().equalsIgnoreCase(username)) {
+                                        userExists = true;
+                                    }
+                                }
+                                if (userExists) {
+                                    Toast.makeText(getActivity(), "Please enter new password", Toast.LENGTH_SHORT).show();
+                                    passwordEditText.setVisibility(View.VISIBLE);
+                                    passwordEditText.setHint("New Password");
+                                    saveTextView.setText("SAVE Password");
+                                } else {
+                                    //forgotPasswordDialog.dismiss();
+                                    Toast.makeText(getActivity(), "User not exists with this email", Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                forgotPasswordDialog.dismiss();
+                                Toast.makeText(getActivity(), "User not exists with this email", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            forgotPasswordDialog.dismiss();
+                            Toast.makeText(getActivity(), "User not exists with this email", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(getActivity(), "Please fill all details", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    String forgotUsername = usernameEditText.getText().toString();
+                    UserModel forgotUserModel = new UserModel();
+                    forgotUserModel.setUsername(username);
+                    String forgotPassword = passwordEditText.getText().toString();
+                    forgotUserModel.setPassword(forgotPassword);
+                    if (forgotUsername != null && forgotPassword != null && isValidEmail(forgotUsername) && isValidPassword(forgotPassword)) {
+                        UserListModel userListModel = AppSettings.get().getUserListModel();
+                        if (userListModel != null) {
+                            ArrayList<UserModel> userModelArrayList = userListModel.getUserModelArrayList();
+                            if (userModelArrayList != null) {
+                                for (int p = 0; p < userModelArrayList.size(); p++) {
+                                    if (userModelArrayList.get(p).getUsername().equalsIgnoreCase(username)) {
+                                        userModelArrayList.get(p).setPassword(forgotPassword);
+                                    }
+                                }
+                                UserListModel usm = new UserListModel();
+                                usm.setUserModelArrayList(userModelArrayList);
+                                AppSettings.get().setUserListModel(usm);
+                                forgotPasswordDialog.dismiss();
+                                Toast.makeText(getActivity(), "Password Update Successful", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        forgotPasswordDialog.show();
+    }
+
     public void registerFragment() {
         final Dialog registerDialog = new Dialog(getActivity());
         registerDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -150,9 +249,12 @@ public class SettingsMasterFragment extends SettingsBaseFragment {
         EditText usernameEditText = registerDialog.findViewById(R.id.usernameEditText);
         EditText passwordEditText = registerDialog.findViewById(R.id.passwordEditText);
         TextView saveTextView = registerDialog.findViewById(R.id.saveTextView);
+        TextView forgotPasswordTextView = registerDialog.findViewById(R.id.forgotPasswordTextView);
+        forgotPasswordTextView.setVisibility(View.GONE);
         registerTextView.setVisibility(View.GONE);
         saveTextView.setText("REGISTER");
         headingTextView.setText("User Registration");
+
         saveTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -161,7 +263,7 @@ public class SettingsMasterFragment extends SettingsBaseFragment {
                 UserModel userModel = new UserModel();
                 userModel.setUsername(username);
                 userModel.setPassword(password);
-                if (username != null && password != null & username.length() > 0 && password.length() > 0) {
+                if (username != null && password != null && isValidEmail(username) && isValidPassword(password)) {
                     UserListModel userListModel = AppSettings.get().getUserListModel();
                     if (userListModel != null) {
                         ArrayList<UserModel> userModelArrayList = userListModel.getUserModelArrayList();
@@ -181,9 +283,10 @@ public class SettingsMasterFragment extends SettingsBaseFragment {
                                 UserListModel usm = new UserListModel();
                                 usm.setUserModelArrayList(userModelArrayList);
                                 AppSettings.get().setUserListModel(usm);
-                                Intent intent = new Intent(getActivity(), HideAppsActivity.class);
+                                /*Intent intent = new Intent(getActivity(), HideAppsActivity.class);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                                startActivity(intent);
+                                startActivity(intent);*/
+                                loginFragment();
                             }
                         } else {
                             registerDialog.dismiss();
@@ -191,9 +294,10 @@ public class SettingsMasterFragment extends SettingsBaseFragment {
                             UserListModel usm = new UserListModel();
                             usm.setUserModelArrayList(userModelArrayList);
                             AppSettings.get().setUserListModel(usm);
-                            Intent intent = new Intent(getActivity(), HideAppsActivity.class);
+                            /*Intent intent = new Intent(getActivity(), HideAppsActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                            startActivity(intent);
+                            startActivity(intent);*/
+                            loginFragment();
                         }
                     } else {
                         registerDialog.dismiss();
@@ -202,9 +306,10 @@ public class SettingsMasterFragment extends SettingsBaseFragment {
                         UserListModel usm = new UserListModel();
                         usm.setUserModelArrayList(userModelArrayList);
                         AppSettings.get().setUserListModel(usm);
-                        Intent intent = new Intent(getActivity(), HideAppsActivity.class);
+                        /*Intent intent = new Intent(getActivity(), HideAppsActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                        startActivity(intent);
+                        startActivity(intent);*/
+                        loginFragment();
                     }
                 } else {
                     Toast.makeText(getActivity(), "Please fill all details", Toast.LENGTH_SHORT).show();
@@ -213,5 +318,23 @@ public class SettingsMasterFragment extends SettingsBaseFragment {
         });
 
         registerDialog.show();
+    }
+
+
+    public boolean isValidEmail(String email) {
+        boolean result = false;
+        String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
+        if (email.matches(emailPattern)) {
+            result = true;
+        }
+        return result;
+    }
+
+    public boolean isValidPassword(String password) {
+        boolean result = false;
+        if (password.length() == 8) {
+            result = true;
+        }
+        return result;
     }
 }

@@ -258,6 +258,14 @@ public class HideAppsFragment extends Fragment {
             if (limitString != null) {
                 limit = Integer.parseInt(limitString);
             }
+
+            try{
+                Log.v("app_values",appInfo.getLabel()+":::"+ String.valueOf(usageStats.getTotalTimeInForeground() / 60000) + " Limit: " + String.valueOf(limit));
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+
             if (usageStats == null) {
                 holder._apkPackage.setText("Usage: " + "0" + " Limit: " + String.valueOf(limit));
             } else {
@@ -277,7 +285,6 @@ public class HideAppsFragment extends Fragment {
                     int list_position = -1;
                     if (timerListModel != null) {
                         ArrayList<Timer> timerArrayList = timerListModel.getTimerArrayList();
-
                         if (timerArrayList != null) {
                             for (int p = 0; p < timerArrayList.size(); p++) {
                                 if (timerArrayList.get(p).getPackageName().equalsIgnoreCase(appInfo.getPackageName())) {
@@ -354,10 +361,10 @@ public class HideAppsFragment extends Fragment {
         mPackageStats.addAll(map.values());
 
         for (int g = 0; g < mPackageStats.size(); g++) {
-            if (mPackageStats.get(g).getPackageName().equalsIgnoreCase("com.mcdonalds.app.qa")) {
-                Log.v("appsTime", String.valueOf(mPackageStats.get(g).getPackageName()) + " : " + String.valueOf(DateUtils.formatElapsedTime(mPackageStats.get(g).getTotalTimeInForeground() / 1000)));
+            //if (mPackageStats.get(g).getPackageName().equalsIgnoreCase("com.mcdonalds.app.qa")) {
+                //Log.v("appsTime", String.valueOf(mPackageStats.get(g).getPackageName()) + " : " + String.valueOf(DateUtils.formatElapsedTime(mPackageStats.get(g).getTotalTimeInForeground() / 1000)));
                 allAppsUsageStats.put(String.valueOf(mPackageStats.get(g).getPackageName()), mPackageStats.get(g));
-            }
+            //}
         }
 
     }
